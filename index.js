@@ -3,12 +3,15 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
+const { EARN_CHANNEL_ID } = require('./config.json');
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildVoiceStates,
   ],
 });
 
@@ -40,6 +43,14 @@ for (const file of eventFiles) {
 // Dispatcher des interactions slash
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.channelId !== EARN_CHANNEL_ID) {
+    return interaction.reply({
+      content: `Les commandes ne fonctionnent que dans <#${EARN_CHANNEL_ID}>.`,
+      ephemeral: true,
+    });
+  }
+
   const cmd = client.commands.get(interaction.commandName);
   if (!cmd) return;
   try {
